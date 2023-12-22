@@ -1,7 +1,6 @@
 package com.dyma.tennis.service;
 
 import com.dyma.tennis.Player;
-import com.dyma.tennis.PlayerList;
 import com.dyma.tennis.PlayerToSave;
 import com.dyma.tennis.Rank;
 import com.dyma.tennis.data.PlayerEntity;
@@ -68,19 +67,21 @@ public class PlayerService {
     }
 
     public Player update(PlayerToSave playerToSave) {
-        return null;
-        /*getByLastName(playerToSave.lastName());
+        Optional<PlayerEntity> playerToUpdate = playerRepository.findOneByLastNameIgnoreCase(playerToSave.lastName());
+        if (playerToUpdate.isEmpty()) {
+            throw new PlayerNotFoundException(playerToSave.lastName());
+        }
 
-        List<Player> playersWithoutPlayerToUpdate = PlayerList.ALL.stream()
-                .filter(player -> !player.lastName().equals(playerToSave.lastName()))
-                .toList();
+        playerToUpdate.get().setFirstName(playerToSave.firstName());
+        playerToUpdate.get().setBirthDate(playerToSave.birthDate());
+        playerToUpdate.get().setPoints(playerToSave.points());
+        PlayerEntity updatedPlayer = playerRepository.save(playerToUpdate.get());
 
-        RankingCalculator rankingCalculator = new RankingCalculator(playersWithoutPlayerToUpdate);
-        List<Player> players = rankingCalculator.getNewPlayersRanking();
+        RankingCalculator rankingCalculator = new RankingCalculator(playerRepository.findAll());
+        List<PlayerEntity> newRanking = rankingCalculator.getNewPlayersRanking();
+        playerRepository.saveAll(newRanking);
 
-        return players.stream()
-                .filter(player -> player.lastName().equals(playerToSave.lastName()))
-                .findFirst().get();*/
+        return getByLastName(updatedPlayer.getLastName());
     }
 
     public void delete(String lastName) {
